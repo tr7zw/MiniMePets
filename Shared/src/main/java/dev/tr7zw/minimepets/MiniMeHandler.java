@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
@@ -36,6 +38,8 @@ import net.minecraft.world.entity.player.Player;
 public interface MiniMeHandler<T extends TamableAnimal>  {
 
     static AtomicBoolean steve = new AtomicBoolean(true);
+    
+    static ExecutorService exector = Executors.newFixedThreadPool(1);
 
     static WeakHashMap<TamableAnimal, GameProfile> profiles = new WeakHashMap<>();
     static WeakHashMap<TamableAnimal, String> animalNames = new WeakHashMap<>();
@@ -46,42 +50,46 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
     public default void rendering(T livingEntity, float f, float g, PoseStack poseStack,
             MultiBufferSource multiBufferSource, int i) {
         if (livingEntity.getOwnerUUID() != null) {
-            if(livingEntity.getCustomName() != null) {
-                if(!livingEntity.getCustomName().toString().equals(animalNames.get(livingEntity))) {
-                    profiles.remove(livingEntity);
-                }
+            if(livingEntity.getCustomName() != null && !livingEntity.getCustomName().getString().equals(animalNames.get(livingEntity))) {
+                profiles.remove(livingEntity);
             }
             if(!profiles.containsKey(livingEntity)) {
                 if(livingEntity.getCustomName() != null) {
+                    profiles.put(livingEntity, null); // set to null, so only one attempt to load is made
                     String name = livingEntity.getCustomName().getString();
                     if(invalidNames.contains(name)) {
                         superRender(livingEntity, f, g, poseStack, multiBufferSource, i);
                         return;
                     }
-                    nameCache.computeIfAbsent(name, a -> getUuid(name));
-                    UUID uuid = nameCache.get(name);
-                    if(uuid == null) { // not a valid name
-                        invalidNames.add(name);
-                        superRender(livingEntity, f, g, poseStack, multiBufferSource, i);
-                        return;
-                    }
-                    animalNames.put(null, name);
-                    if(cachedProfiles.containsKey(uuid)) {
-                        profiles.put(livingEntity, cachedProfiles.get(uuid));
-                    } else {
-                        profiles.put(livingEntity, new GameProfile(uuid, null));
-                        cachedProfiles.put(profiles.get(livingEntity).getId(), profiles.get(livingEntity));
-                        Minecraft.getInstance().getSkinManager().registerSkins(profiles.get(livingEntity), null, false);
-                    }
+                    animalNames.put(livingEntity, name);
+                    exector.submit(() -> {
+                        nameCache.computeIfAbsent(name, a -> getUuid(name));
+                        UUID uuid = nameCache.get(name);
+                        if(uuid == null) { // not a valid name
+                            invalidNames.add(name);
+                            return;
+                        }
+                        if(cachedProfiles.containsKey(uuid)) {
+                            profiles.put(livingEntity, cachedProfiles.get(uuid));
+                        } else {
+                            GameProfile profile = new GameProfile(uuid, null);
+                            profiles.put(livingEntity, profile);
+                            cachedProfiles.put(uuid, profile);
+                            Minecraft.getInstance().getSkinManager().registerSkins(profile, null, false);
+                        }
+                    });
                 }else {
                     superRender(livingEntity, f, g, poseStack, multiBufferSource, i);
                     return;
                 }
             }
-            ResourceLocation id = getSkin(profiles.get(livingEntity));
-            VertexConsumer vertices = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(id));
-            renderPlayerAS(livingEntity, f, g, poseStack, multiBufferSource, i, vertices, steve.get() ? getDefaultModel() : getSlimModel());
-            return;
+            GameProfile profile = profiles.get(livingEntity);
+            if(profile != null) {
+                ResourceLocation id = getSkin(profile);
+                VertexConsumer vertices = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(id));
+                renderPlayerAS(livingEntity, f, g, poseStack, multiBufferSource, i, vertices, steve.get() ? getDefaultModel() : getSlimModel());
+                return;
+            }
         }
         superRender(livingEntity, f, g, poseStack, multiBufferSource, i);
     }
@@ -97,7 +105,7 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
                 return null;                       
             }
             JsonObject jsonObject = new JsonParser().parse(UUIDJson).getAsJsonObject();
-            MiniMeShared.LOGGER.info("Got uuid for '" + name + "': " + jsonObject.get("id").getAsString());
+//            MiniMeShared.LOGGER.info("Got uuid for '" + name + "': " + jsonObject.get("id").getAsString());
             return UUID.fromString(
                     jsonObject.get("id").getAsString()
                     .replaceFirst( 
