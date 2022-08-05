@@ -29,11 +29,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.player.Player;
 
 public interface MiniMeHandler<T extends TamableAnimal>  {
 
@@ -133,7 +133,7 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
                     MinecraftProfileTexture.Type.SKIN);
         }
         return (ResourceLocation) DefaultPlayerSkin
-                .getDefaultSkin((UUID) Player.createPlayerUUID((GameProfile) gameProfile));
+                .getDefaultSkin((UUID) UUIDUtil.getOrCreatePlayerUUID((GameProfile) gameProfile));
     }
     
     public float getAnimationProgressRedirect(T entity, float tickDelta);
