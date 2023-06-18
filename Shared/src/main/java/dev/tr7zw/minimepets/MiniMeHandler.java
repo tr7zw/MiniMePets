@@ -146,7 +146,7 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
     public PlayerModel<TamableAnimal> getDefaultModel();
     public PlayerModel<TamableAnimal> getSlimModel();
 
-    public default void renderPlayerAS(T livingEntity, float f, float g, PoseStack poseStack,
+    public default void renderPlayerAS(T livingEntity, float f, float tick, PoseStack poseStack,
             MultiBufferSource MultiBufferSource, int i, VertexConsumer vertices,
             PlayerModel<TamableAnimal> targetmodel) {
         poseStack.pushPose();
@@ -156,14 +156,14 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
         targetmodel.riding = livingEntity.isPassenger() || livingEntity.isInSittingPose();
         targetmodel.young = false;//livingEntity.isBaby();
         targetmodel.crouching = animateShaking(livingEntity) && (System.currentTimeMillis()/100%2==0);
-        float h = Mth.rotLerp((float) g, (float) livingEntity.yBodyRotO,
+        float h = Mth.rotLerp((float) tick, (float) livingEntity.yBodyRotO,
                 (float) livingEntity.yBodyRot);
-        float j = Mth.rotLerp((float) g, (float) livingEntity.yHeadRotO,
+        float j = Mth.rotLerp((float) tick, (float) livingEntity.yHeadRotO,
                 (float) livingEntity.yHeadRot);
         float k = j - h;
         if (livingEntity.isPassenger() && livingEntity.getVehicle() instanceof LivingEntity) {
             LivingEntity livingEntity2 = (LivingEntity) livingEntity.getVehicle();
-            h = Mth.rotLerp((float) g, (float) livingEntity2.yBodyRotO,
+            h = Mth.rotLerp((float) tick, (float) livingEntity2.yBodyRotO,
                     (float) livingEntity2.yBodyRot);
             k = j - h;
             float l = Mth.wrapDegrees((float) k);
@@ -179,11 +179,11 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
             }
             k = j - h;
         }
-        float m = Mth.lerp((float) g, (float) livingEntity.xRotO, (float) livingEntity.getXRot());
-        float o = getAnimationProgressRedirect(livingEntity, g);
-        this.setupTransformsRedirect(livingEntity, poseStack, o, h, g);
+        float m = Mth.lerp((float) tick, (float) livingEntity.xRotO, (float) livingEntity.getXRot());
+        float o = getAnimationProgressRedirect(livingEntity, tick);
+        this.setupTransformsRedirect(livingEntity, poseStack, o, h, tick);
         poseStack.scale(-1.0f, -1.0f, 1.0f);
-        this.scaleRedirect(livingEntity, poseStack, g);
+        this.scaleRedirect(livingEntity, poseStack, tick);
         poseStack.translate(0.0, -1.5010000467300415, 0.0);
         if(targetmodel.riding) {
             if(targetmodel.young) {
@@ -195,8 +195,8 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
         float p = 0.0f;
         float q = 0.0f;
         if (!livingEntity.isPassenger() && livingEntity.isAlive()) {
-            p = Mth.lerp((float) g, (float) livingEntity.animationSpeedOld, (float) livingEntity.animationSpeed);
-            q = livingEntity.animationPosition - livingEntity.animationSpeed * (1.0f - g);
+            p = livingEntity.walkAnimation.speed(tick);
+            q = livingEntity.walkAnimation.position(tick);
             if (livingEntity.isBaby()) {
                 q *= 3.0f;
             }
@@ -204,12 +204,12 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
                 p = 1.0f;
             }
         }
-        targetmodel.prepareMobModel(livingEntity, q, p, g);
+        targetmodel.prepareMobModel(livingEntity, q, p, tick);
         targetmodel.setupAnim(livingEntity, q, p, o, k, m);
         Minecraft minecraft = Minecraft.getInstance();
         boolean bl = this.isVisibleRedirect(livingEntity);
         boolean bl2 = !bl && !livingEntity.isInvisibleTo(minecraft.player);
-        int r = LivingEntityRenderer.getOverlayCoords(livingEntity, this.getAnimationCounterRedirect(livingEntity, g));
+        int r = LivingEntityRenderer.getOverlayCoords(livingEntity, this.getAnimationCounterRedirect(livingEntity, tick));
         targetmodel.renderToBuffer(poseStack, vertices, i, r, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
         poseStack.popPose();
         //super.render(livingEntity, f, g, PoseStack, MultiBufferSource, i);
