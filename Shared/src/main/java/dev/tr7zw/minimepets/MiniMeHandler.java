@@ -23,6 +23,7 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import dev.tr7zw.minimepets.MiniMeShared.RenderEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -85,9 +86,15 @@ public interface MiniMeHandler<T extends TamableAnimal>  {
             }
             GameProfile profile = profiles.get(livingEntity);
             if(profile != null) {
+                RenderEvent event = new RenderEvent(livingEntity, (LivingEntityRenderer)(Object)this, f, poseStack, multiBufferSource, i, new AtomicBoolean());
+                MiniMeShared.instance.renderPreEvent.callEvent(event);
+                if(event.cancled().get()) {
+                    return;// cancel all rendering
+                }
                 ResourceLocation id = getSkin(profile);
                 VertexConsumer vertices = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(id));
                 renderPlayerAS(livingEntity, f, g, poseStack, multiBufferSource, i, vertices, steve.get() ? getDefaultModel() : getSlimModel());
+                MiniMeShared.instance.renderPostEvent.callEvent(event);
                 return;
             }
         }
