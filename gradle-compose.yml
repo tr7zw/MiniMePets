@@ -4,7 +4,7 @@ replacements:
   group: "dev.tr7zw"
   name: "MiniMePets"
   id: "minimepets"
-  version: "1.0.1"
+  version: "1.0.2"
   relocationpackage: "dev.tr7zw.minimepets"
   modrinthid: "u4pgScAU"
   curseforgeid: "593611"
