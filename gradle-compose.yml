@@ -4,7 +4,7 @@ replacements:
   group: "dev.tr7zw"
   name: "MiniMePets"
   id: "minimepets"
-  version: "1.0.2"
+  version: "1.0.3"
   description: "Swap named wolfs and cats with tiny players."
   homepageUrl: "https://modrinth.com/plugin/itemswapper"
   sourcesUrl: "https://github.com/tr7zw/DisguiseHeads"
