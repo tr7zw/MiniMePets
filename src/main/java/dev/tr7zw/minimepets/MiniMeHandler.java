@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,10 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.ParseException;
 
-import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -35,12 +34,20 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.PlayerSkin.Model;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+
+// spotless:off 
+//#if MC >= 12005
+//#else
+//$$ import net.minecraft.nbt.CompoundTag;
+//$$ import com.google.common.cache.LoadingCache;
+//$$ import java.util.concurrent.CompletableFuture;
+//#endif
+//spotless:on
 
 public interface MiniMeHandler<T extends TamableAnimal> {
 
@@ -48,9 +55,16 @@ public interface MiniMeHandler<T extends TamableAnimal> {
 
     static ExecutorService exector = Executors.newFixedThreadPool(1);
 
-    static WeakHashMap<TamableAnimal, CompoundTag> profiles = new WeakHashMap<>();
     static WeakHashMap<TamableAnimal, String> animalNames = new WeakHashMap<>();
-    static Map<UUID, CompoundTag> cachedProfiles = new HashMap<>();
+    // spotless:off 
+    //#if MC >= 12005
+    static Map<UUID, GameProfile> cachedProfiles = new HashMap<>();
+    static WeakHashMap<TamableAnimal, GameProfile> profiles = new WeakHashMap<>();
+    //#else
+    //$$ static Map<UUID, CompoundTag> cachedProfiles = new HashMap<>();
+    //$$ static WeakHashMap<TamableAnimal, CompoundTag> profiles = new WeakHashMap<>();
+    //#endif
+    //spotless:on
     static Map<String, UUID> nameCache = new HashMap<>();
     static Set<String> invalidNames = new HashSet<>();
 
@@ -80,13 +94,7 @@ public interface MiniMeHandler<T extends TamableAnimal> {
                         if (cachedProfiles.containsKey(uuid)) {
                             profiles.put(livingEntity, cachedProfiles.get(uuid));
                         } else {
-                            CompoundTag tag = new CompoundTag();
-                            tag.putString("SkullOwner", name);
-                            SkullBlockEntity.resolveGameProfile(tag);
-                            profiles.put(livingEntity, tag);
-                            cachedProfiles.put(uuid, tag);
-//                            Minecraft.getInstance().getSkinManager().getOrLoad(profile);
-//                            Minecraft.getInstance().getSkinManager().registerSkins(profile, null, false);
+                            resolveProfile(livingEntity, name, uuid);
                         }
                     });
                 } else {
@@ -94,28 +102,49 @@ public interface MiniMeHandler<T extends TamableAnimal> {
                     return;
                 }
             }
-            CompoundTag tag = profiles.get(livingEntity);
-            if (tag != null) {
-                GameProfile profile = SkullBlockEntity.getOrResolveGameProfile(tag);
-                if (profile != null) {
-                    RenderEvent event = new RenderEvent(livingEntity, (LivingEntityRenderer) (Object) this, f,
-                            poseStack, multiBufferSource, i, new AtomicBoolean());
-                    MiniMeShared.instance.renderPreEvent.callEvent(event);
-                    if (event.cancled().get()) {
-                        return;// cancel all rendering
-                    }
-                    PlayerSkin skin = Minecraft.getInstance().getSkinManager().getInsecureSkin(profile);
-                    ResourceLocation id = skin.texture();
-                    steve.set(skin.model() == Model.WIDE);
-                    VertexConsumer vertices = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(id));
-                    renderPlayerAS(livingEntity, f, g, poseStack, multiBufferSource, i, vertices,
-                            steve.get() ? getDefaultModel() : getSlimModel());
-                    MiniMeShared.instance.renderPostEvent.callEvent(event);
-                    return;
+            // spotless:off 
+            //#if MC >= 12005
+            GameProfile profile = profiles.get(livingEntity);
+            //#else
+            //$$ CompoundTag tag = profiles.get(livingEntity);
+            //$$ GameProfile profile = tag != null ? SkullBlockEntity.getOrResolveGameProfile(tag) : null;
+            //#endif
+            //spotless:on
+            if (profile != null) {
+                RenderEvent event = new RenderEvent(livingEntity, (LivingEntityRenderer) (Object) this, f, poseStack,
+                        multiBufferSource, i, new AtomicBoolean());
+                MiniMeShared.instance.renderPreEvent.callEvent(event);
+                if (event.cancled().get()) {
+                    return;// cancel all rendering
                 }
+                PlayerSkin skin = Minecraft.getInstance().getSkinManager().getInsecureSkin(profile);
+                ResourceLocation id = skin.texture();
+                steve.set(skin.model() == Model.WIDE);
+                VertexConsumer vertices = multiBufferSource.getBuffer(RenderType.entityCutoutNoCull(id));
+                renderPlayerAS(livingEntity, f, g, poseStack, multiBufferSource, i, vertices,
+                        steve.get() ? getDefaultModel() : getSlimModel());
+                MiniMeShared.instance.renderPostEvent.callEvent(event);
+                return;
             }
         }
         superRender(livingEntity, f, g, poseStack, multiBufferSource, i);
+    }
+
+    public default void resolveProfile(T livingEntity, String name, UUID uuid) {
+        // spotless:off 
+        //#if MC >= 12005
+        SkullBlockEntity.fetchGameProfile(uuid).thenAccept(prof -> {
+            profiles.put(livingEntity, prof.get());
+            cachedProfiles.put(uuid, prof.get());
+        });
+        //#else
+        //$$ CompoundTag tag = new CompoundTag();
+        //$$ tag.putString("SkullOwner", name);
+        //$$ SkullBlockEntity.resolveGameProfile(tag);
+        //$$ profiles.put(livingEntity, tag);
+        //$$ cachedProfiles.put(uuid, tag);
+        //#endif
+        //spotless:on
     }
 
     public static PlayerSkin getSkin(GameProfile gameProfile) {
@@ -239,7 +268,13 @@ public interface MiniMeHandler<T extends TamableAnimal> {
         boolean bl2 = !bl && !livingEntity.isInvisibleTo(minecraft.player);
         int r = LivingEntityRenderer.getOverlayCoords(livingEntity,
                 this.getAnimationCounterRedirect(livingEntity, tick));
-        targetmodel.renderToBuffer(poseStack, vertices, i, r, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        // spotless:off 
+        //#if MC >= 12100
+        targetmodel.renderToBuffer(poseStack, vertices, i, r, Integer.MAX_VALUE);
+        //#else
+        //$$ targetmodel.renderToBuffer(poseStack, vertices, i, r, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        //#endif
+        //spotless:on
         poseStack.popPose();
         // super.render(livingEntity, f, g, PoseStack, MultiBufferSource, i);
     }
