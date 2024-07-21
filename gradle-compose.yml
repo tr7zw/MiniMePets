@@ -4,7 +4,7 @@ replacements:
   group: "dev.tr7zw"
   name: "MiniMePets"
   id: "minimepets"
-  version: "1.0.3"
+  version: "1.0.3.1"
   description: "Swap named wolfs and cats with tiny players."
   homepageUrl: "https://modrinth.com/plugin/itemswapper"
   sourcesUrl: "https://github.com/tr7zw/DisguiseHeads"
@@ -12,7 +12,7 @@ replacements:
   fabric_entrypoint: "dev.tr7zw.minimepets.MiniMeMod"
   fabric_modmenu_entrypoint: "null"
   relocationpackage: "dev.tr7zw.minimepets"
-  curseforgeid: "593611"
+  curseforgeid: "593627"
   versionlessname: "MiniVersionless"
 enabledFlags:
   - autopublish
