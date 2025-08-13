@@ -40,14 +40,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
-// spotless:off 
-//#if MC >= 12005
-//#else
-//$$ import net.minecraft.nbt.CompoundTag;
-//$$ import com.google.common.cache.LoadingCache;
-//$$ import java.util.concurrent.CompletableFuture;
-//#endif
-//spotless:on
+//? if >= 1.20.5 {
+//? } else {
+// import net.minecraft.nbt.CompoundTag;
+// import com.google.common.cache.LoadingCache;
+// import java.util.concurrent.CompletableFuture;
+//? }
 
 public interface MiniMeHandler<T extends TamableAnimal> {
 
@@ -56,15 +54,13 @@ public interface MiniMeHandler<T extends TamableAnimal> {
     static ExecutorService exector = Executors.newFixedThreadPool(1);
 
     static WeakHashMap<TamableAnimal, String> animalNames = new WeakHashMap<>();
-    // spotless:off 
-    //#if MC >= 12005
+    //? if >= 1.20.5 {
     static Map<UUID, GameProfile> cachedProfiles = new HashMap<>();
     static WeakHashMap<TamableAnimal, GameProfile> profiles = new WeakHashMap<>();
-    //#else
-    //$$ static Map<UUID, CompoundTag> cachedProfiles = new HashMap<>();
-    //$$ static WeakHashMap<TamableAnimal, CompoundTag> profiles = new WeakHashMap<>();
-    //#endif
-    //spotless:on
+    //? } else {
+    // static Map<UUID, CompoundTag> cachedProfiles = new HashMap<>();
+    // static WeakHashMap<TamableAnimal, CompoundTag> profiles = new WeakHashMap<>();
+    //? }
     static Map<String, UUID> nameCache = new HashMap<>();
     static Set<String> invalidNames = new HashSet<>();
 
@@ -102,14 +98,12 @@ public interface MiniMeHandler<T extends TamableAnimal> {
                     return;
                 }
             }
-            // spotless:off 
-            //#if MC >= 12005
+            //? if >= 1.20.5 {
             GameProfile profile = profiles.get(livingEntity);
-            //#else
-            //$$ CompoundTag tag = profiles.get(livingEntity);
-            //$$ GameProfile profile = tag != null ? SkullBlockEntity.getOrResolveGameProfile(tag) : null;
-            //#endif
-            //spotless:on
+            //? } else {
+            // CompoundTag tag = profiles.get(livingEntity);
+            // GameProfile profile = tag != null ? SkullBlockEntity.getOrResolveGameProfile(tag) : null;
+            //? }
             if (profile != null) {
                 RenderEvent event = new RenderEvent(livingEntity, (LivingEntityRenderer) (Object) this, f, poseStack,
                         multiBufferSource, i, new AtomicBoolean());
@@ -131,20 +125,18 @@ public interface MiniMeHandler<T extends TamableAnimal> {
     }
 
     public default void resolveProfile(T livingEntity, String name, UUID uuid) {
-        // spotless:off 
-        //#if MC >= 12005
+        //? if >= 1.20.5 {
         SkullBlockEntity.fetchGameProfile(uuid).thenAccept(prof -> {
             profiles.put(livingEntity, prof.get());
             cachedProfiles.put(uuid, prof.get());
         });
-        //#else
-        //$$ CompoundTag tag = new CompoundTag();
-        //$$ tag.putString("SkullOwner", name);
-        //$$ SkullBlockEntity.resolveGameProfile(tag);
-        //$$ profiles.put(livingEntity, tag);
-        //$$ cachedProfiles.put(uuid, tag);
-        //#endif
-        //spotless:on
+        //? } else {
+        // CompoundTag tag = new CompoundTag();
+        // tag.putString("SkullOwner", name);
+        // SkullBlockEntity.resolveGameProfile(tag);
+        // profiles.put(livingEntity, tag);
+        // cachedProfiles.put(uuid, tag);
+        //? }
     }
 
     public static PlayerSkin getSkin(GameProfile gameProfile) {
@@ -179,7 +171,7 @@ public interface MiniMeHandler<T extends TamableAnimal> {
                 return null;
             }
             JsonObject jsonObject = new JsonParser().parse(UUIDJson).getAsJsonObject();
-//            MiniMeShared.LOGGER.info("Got uuid for '" + name + "': " + jsonObject.get("id").getAsString());
+            //            MiniMeShared.LOGGER.info("Got uuid for '" + name + "': " + jsonObject.get("id").getAsString());
             return UUID.fromString(jsonObject.get("id").getAsString().replaceFirst(
                     "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                     "$1-$2-$3-$4-$5"));
@@ -268,13 +260,11 @@ public interface MiniMeHandler<T extends TamableAnimal> {
         boolean bl2 = !bl && !livingEntity.isInvisibleTo(minecraft.player);
         int r = LivingEntityRenderer.getOverlayCoords(livingEntity,
                 this.getAnimationCounterRedirect(livingEntity, tick));
-        // spotless:off 
-        //#if MC >= 12100
+        //? if >= 1.21.0 {
         targetmodel.renderToBuffer(poseStack, vertices, i, r, Integer.MAX_VALUE);
-        //#else
-        //$$ targetmodel.renderToBuffer(poseStack, vertices, i, r, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
-        //#endif
-        //spotless:on
+        //? } else {
+        // targetmodel.renderToBuffer(poseStack, vertices, i, r, 1.0f, 1.0f, 1.0f, bl2 ? 0.15f : 1.0f);
+        //? }
         poseStack.popPose();
         // super.render(livingEntity, f, g, PoseStack, MultiBufferSource, i);
     }

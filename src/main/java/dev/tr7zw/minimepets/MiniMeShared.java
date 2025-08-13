@@ -1,18 +1,14 @@
 package dev.tr7zw.minimepets;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import com.mojang.blaze3d.vertex.*;
+import dev.tr7zw.minimepets.api.*;
+import dev.tr7zw.transition.loader.*;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.*;
+import net.minecraft.world.entity.*;
+import org.apache.logging.log4j.*;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.mojang.blaze3d.vertex.PoseStack;
-
-import dev.tr7zw.minimepets.api.Event;
-import dev.tr7zw.minimepets.api.EventFactory;
-import dev.tr7zw.util.ModLoaderUtil;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.world.entity.LivingEntity;
+import java.util.concurrent.atomic.*;
 
 public class MiniMeShared {
 

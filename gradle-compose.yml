@@ -1,10 +1,10 @@
 version: '0.0.2'
-source: "https://github.com/tr7zw/ProcessedModTemplate/tree/master"
+source: "https://github.com/tr7zw/ProcessedModTemplate/tree/stonecutter"
 replacements:
   group: "dev.tr7zw"
   name: "MiniMePets"
   id: "minimepets"
-  version: "1.0.3.1"
+  version: "1.1.0"
   description: "Swap named wolfs and cats with tiny players."
   homepageUrl: "https://modrinth.com/plugin/itemswapper"
   sourcesUrl: "https://github.com/tr7zw/DisguiseHeads"
@@ -20,6 +20,9 @@ enabledFlags:
   - publishForge
   - publishNeoForge
   - curseforge
+  - includeLibs
+  - addTRenderLib
+  - addTRansitionLib
 rootProject:
   template: "."
 subProjects:

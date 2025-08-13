@@ -56,13 +56,11 @@ public abstract class WolfRendererMixin extends MobRenderer<Wolf, WolfModel<Wolf
     @Override
     public void setupTransformsRedirect(Wolf entity, PoseStack matrices, float animationProgress, float bodyYaw,
             float tickDelta) {
-        // spotless:off 
-        //#if MC >= 12005
+        //? if >= 1.20.5 {
         setupRotations(entity, matrices, animationProgress, bodyYaw, tickDelta, 0);
-        //#else
-        //$$ setupRotations(entity, matrices, animationProgress, bodyYaw, tickDelta);
-        //#endif
-        //spotless:on
+        //? } else {
+        // setupRotations(entity, matrices, animationProgress, bodyYaw, tickDelta);
+        //? }
     }
 
     @Override
