@@ -21,7 +21,6 @@ enabledFlags:
   - publishNeoForge
   - curseforge
   - includeLibs
-  - addTRenderLib
   - addTRansitionLib
 rootProject:
   template: "."
