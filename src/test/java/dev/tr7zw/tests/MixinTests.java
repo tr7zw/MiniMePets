@@ -9,7 +9,13 @@ import net.minecraft.SharedConstants;
 import net.minecraft.client.renderer.entity.CatRenderer;
 import net.minecraft.client.renderer.entity.WolfRenderer;
 import net.minecraft.server.Bootstrap;
-import net.minecraft.world.entity.animal.Wolf;
+//? if >= 1.21.5 {
+import net.minecraft.world.entity.animal.wolf.*;
+//? } else {
+/*
+import net.minecraft.world.entity.animal.*;
+ */
+//? }
 
 public class MixinTests {
 
