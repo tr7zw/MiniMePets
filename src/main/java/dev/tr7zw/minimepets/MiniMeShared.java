@@ -1,7 +1,7 @@
 package dev.tr7zw.minimepets;
 
 import com.mojang.blaze3d.vertex.*;
-import dev.tr7zw.minimepets.api.*;
+import dev.tr7zw.transition.event.*;
 import dev.tr7zw.transition.loader.*;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.*;
@@ -24,7 +24,13 @@ public class MiniMeShared {
     }
 
     public record RenderEvent(LivingEntity entity, LivingEntityRenderer renderer, float partialTick,
-            PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, AtomicBoolean cancled) {
+            PoseStack poseStack,
+  //? if < 26.3 {
+  /*
+  MultiBufferSource multiBufferSource,
+   */
+  //? }
+                              int packedLight, AtomicBoolean cancled) {
     }
 
 }

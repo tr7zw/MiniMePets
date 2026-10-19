@@ -3,6 +3,7 @@ package dev.tr7zw.minimepets.mixin;
 import com.google.gson.*;
 import com.mojang.authlib.*;
 import com.mojang.blaze3d.vertex.*;
+import dev.tr7zw.transition.mc.*;
 import net.minecraft.client.*;
 import net.minecraft.client.model.*;
 import net.minecraft.client.renderer.*;
@@ -13,10 +14,10 @@ import net.minecraft.client.resources.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.*;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.*;
 import org.apache.commons.io.*;
-import org.apache.http.*;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.*;
@@ -42,15 +43,31 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
     private static Set<String> invalidNames = new HashSet<>();
     boolean rendering = false;
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    public void render(LivingEntityRenderState livingEntity, PoseStack poseStack, MultiBufferSource multiBufferSource,
+    //? if >= 1.21.9 {
+
+    @Inject(method = "submit", at = @At("HEAD"), cancellable = true)
+    public void submit(LivingEntityRenderState livingEntity, PoseStack poseStack,
+                       SubmitNodeCollector submitNodeCollector,
+                       net.minecraft.client.renderer.state.level.CameraRenderState cameraRenderState, CallbackInfo info) {
+        //? } else {
+
+        /*@Inject(method = "render", at = @At("HEAD"), cancellable = true)
+        public void render(LivingEntityRenderState livingEntity, PoseStack poseStack, MultiBufferSource multiBufferSource,
             int packedLight, CallbackInfo info) {
+        *///? }
         if (rendering) {
             return;
         }
         if ((livingEntity instanceof FelineRenderState || livingEntity instanceof WolfRenderState)
                 && !livingEntity.isInvisible) {
+            //? if >= 26.3 {
+
+            GameProfile profile = getProfile(livingEntity.nameTag);
+            //? } else {
+            /*
             GameProfile profile = getProfile(livingEntity.customName);
+             */
+            //? }
             if (profile == null) {
                 return;
             }
@@ -58,11 +75,11 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
             if (skin == null) {
                 return;
             }
-            ResourceLocation id = skin.texture();
+            Identifier id = skin.texture();
             EntityRenderer playerRenderer = Minecraft.getInstance().getEntityRenderDispatcher()
                     .getRenderer(Minecraft.getInstance().player);
             rendering = true;
-            PlayerRenderState fakePlayer = (PlayerRenderState) playerRenderer.createRenderState();
+            AvatarRenderState fakePlayer = (AvatarRenderState) playerRenderer.createRenderState();
             remapRenderState(livingEntity, fakePlayer);
             fakePlayer.skin = skin;
             fakePlayer.scale = fakePlayer.isBaby ? 0.3875f : 0.6375f;
@@ -74,7 +91,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
                 }
             }
             fakePlayer.isBaby = false;
-            playerRenderer.render(fakePlayer, poseStack, multiBufferSource, packedLight);
+            //? if >= 1.21.9 {
+
+            playerRenderer.submit(fakePlayer, poseStack, submitNodeCollector, cameraRenderState);
+            //? } else {
+
+            /*playerRenderer.render(fakePlayer, poseStack, multiBufferSource, packedLight);
+             *///? }
             rendering = false;
             info.cancel();
         }
@@ -119,7 +142,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
             return UUID.fromString(jsonObject.get("id").getAsString().replaceFirst(
                     "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)",
                     "$1-$2-$3-$4-$5"));
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             // ignore
         }
         return null;
@@ -132,7 +155,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         });
     }
 
-    private static void remapRenderState(EntityRenderState from, PlayerRenderState to) {
+    private static void remapRenderState(EntityRenderState from, AvatarRenderState to) {
         for (Field src : from.getClass().getFields()) {
             try {
                 Field target = to.getClass().getField(src.getName());
