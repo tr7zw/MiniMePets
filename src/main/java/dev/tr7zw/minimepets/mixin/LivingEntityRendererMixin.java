@@ -3,7 +3,7 @@ package dev.tr7zw.minimepets.mixin;
 import com.google.gson.*;
 import com.mojang.authlib.*;
 import com.mojang.blaze3d.vertex.*;
-import dev.tr7zw.transition.mc.*;
+import dev.tr7zw.minimepets.*;
 import net.minecraft.client.*;
 import net.minecraft.client.model.*;
 import net.minecraft.client.renderer.*;
@@ -12,9 +12,11 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider.*;
 import net.minecraft.client.renderer.entity.state.*;
 import net.minecraft.client.resources.*;
 import net.minecraft.network.chat.*;
+import net.minecraft.util.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
+import net.minecraft.world.item.component.*;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.*;
 import org.apache.commons.io.*;
@@ -36,10 +38,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         super(context);
     }
 
-    private static ExecutorService exector = Executors.newFixedThreadPool(1);
+    //? if <1.21.9 {
+    /*private static ExecutorService exector = Executors.newFixedThreadPool(1);
     private static Map<UUID, GameProfile> cachedProfiles = new HashMap<>();
     private static WeakHashMap<String, GameProfile> profiles = new WeakHashMap<>();
     private static Map<String, UUID> nameCache = new HashMap<>();
+    *///? } else {
+    private static WeakHashMap<String, ResolvableProfile> profiles = new WeakHashMap<>();
+    //? }
     private static Set<String> invalidNames = new HashSet<>();
     boolean rendering = false;
 
@@ -47,8 +53,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
 
     @Inject(method = "submit", at = @At("HEAD"), cancellable = true)
     public void submit(LivingEntityRenderState livingEntity, PoseStack poseStack,
-                       SubmitNodeCollector submitNodeCollector,
-                       net.minecraft.client.renderer.state.level.CameraRenderState cameraRenderState, CallbackInfo info) {
+            SubmitNodeCollector submitNodeCollector,
+            net.minecraft.client.renderer.state.level.CameraRenderState cameraRenderState, CallbackInfo info) {
         //? } else {
 
         /*@Inject(method = "render", at = @At("HEAD"), cancellable = true)
@@ -60,22 +66,17 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         }
         if ((livingEntity instanceof FelineRenderState || livingEntity instanceof WolfRenderState)
                 && !livingEntity.isInvisible) {
-            //? if >= 26.3 {
+            //? if >= 1.21.9 {
 
-            GameProfile profile = getProfile(livingEntity.nameTag);
+            PlayerSkin skin = getSkin(((LivingExtension) livingEntity).minime$getCustomName());
             //? } else {
-            /*
-            GameProfile profile = getProfile(livingEntity.customName);
-             */
-            //? }
-            if (profile == null) {
-                return;
-            }
-            PlayerSkin skin = Minecraft.getInstance().getSkinManager().getInsecureSkin(profile);
+
+            /*PlayerSkin skin = getSkin(livingEntity.customName);
+            
+            *///? }
             if (skin == null) {
                 return;
             }
-            Identifier id = skin.texture();
             EntityRenderer playerRenderer = Minecraft.getInstance().getEntityRenderDispatcher()
                     .getRenderer(Minecraft.getInstance().player);
             rendering = true;
@@ -97,13 +98,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
             //? } else {
 
             /*playerRenderer.render(fakePlayer, poseStack, multiBufferSource, packedLight);
-             *///? }
+            *///? }
             rendering = false;
             info.cancel();
         }
     }
 
-    private GameProfile getProfile(Component customName) {
+    @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("HEAD"))
+    private void onExtractRenderState(LivingEntity entity, LivingEntityRenderState state, float partialTicks,
+            CallbackInfo ci) {
+        ((LivingExtension) state).minime$setCustomName(entity.getCustomName());
+    }
+
+    //?if < 1.21.9 {
+    /*private GameProfile getProfile(Component customName) {
         if (customName == null) {
             return null;
         }
@@ -129,7 +137,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         }
         return profiles.get(name);
     }
-
+    
     private UUID getUuid(String name) {
         String url = "https://api.mojang.com/users/profiles/minecraft/" + name;
         try {
@@ -147,12 +155,48 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         }
         return null;
     }
-
+    
     private void resolveProfile(String name, UUID uuid) {
         SkullBlockEntity.fetchGameProfile(uuid).thenAccept(prof -> {
             profiles.put(name, prof.get());
             cachedProfiles.put(uuid, prof.get());
         });
+    }
+    *///? } else {
+    private ResolvableProfile getProfile(Component customName) {
+        if (customName == null)
+            return null;
+        String nameString = customName.getString();
+        if (!profiles.containsKey(nameString)) {
+            profiles.put(nameString, null);
+            if (invalidNames.contains(nameString))
+                return null;
+            CompletableFuture
+                    .supplyAsync(() -> Minecraft.getInstance().services().profileResolver().fetchByName(nameString),
+                            Util.nonCriticalIoPool())
+                    .thenAcceptAsync(profileOpt -> profileOpt.ifPresentOrElse(
+                            profile -> profiles.put(nameString, ResolvableProfile.createResolved(profile)),
+                            () -> invalidNames.add(nameString)), Minecraft.getInstance());
+        }
+        return profiles.get(nameString);
+    }
+    //? }
+
+    private PlayerSkin getSkin(Component name) {
+        if (name == null)
+            return null;
+        //? if >= 1.21.9 {
+        ResolvableProfile profile = getProfile(name);
+        if (profile == null)
+            return null;
+        return Minecraft.getInstance().playerSkinRenderCache().lookup(profile).getNow(Optional.empty())
+                .map(PlayerSkinRenderCache.RenderInfo::playerSkin).orElse(null);
+        //? } else {
+        /*GameProfile profile = getProfile(name);
+        if (profile == null)
+            return null;
+        return Minecraft.getInstance().getSkinManager().getInsecureSkin(profile);
+        *///? }
     }
 
     private static void remapRenderState(EntityRenderState from, AvatarRenderState to) {

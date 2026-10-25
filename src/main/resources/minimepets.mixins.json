@@ -4,7 +4,8 @@
     "package": "dev.tr7zw.minimepets.mixin",
     "mixins": [],
     "client": [
-        "LivingEntityRendererMixin"
+        "LivingEntityRendererMixin",
+        "LivingEntityRenderStateMixin"
     ],
     "injectors": {
         "defaultRequire": 1
