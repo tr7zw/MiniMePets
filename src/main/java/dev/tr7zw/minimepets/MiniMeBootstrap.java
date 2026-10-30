@@ -32,10 +32,14 @@ import dev.tr7zw.transition.loader.ModLoaderEventUtil;
 public class MiniMeBootstrap {
 
     public MiniMeBootstrap() {
-            if (FMLEnvironment.dist.isClient()){
-                ModLoaderEventUtil.registerClientSetupListener(() -> new MiniMeShared().init());
-            }
+        //? if >=1.21.9 {
+        if (FMLEnvironment.getDist().isClient()){
+        //? } else {
+        /^if (FMLEnvironment.dist.isClient()) {
+            ^///?}
+            ModLoaderEventUtil.registerClientSetupListener(() -> new MiniMeShared().init());
+        }
     }
-    
+
 }
 *///?}
