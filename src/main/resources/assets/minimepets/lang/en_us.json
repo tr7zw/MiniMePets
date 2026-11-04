@@ -1,0 +1,8 @@
+{
+    "text.minimepets.title": "Mini Me Pets",
+    "text.minimepets.tab.whitelist": "Whitelist/Blacklist",
+    "text.minimepets.remove": "Remove",
+    "text.minimepets.whitelist": "Whitelist",
+    "text.minimepets.whitelist.tooltip": "Change that only whitelisted names can be used by Mini Me Pets. Otherwise blacklists names that cannot be used by Mini Me Pets.",
+    "text.minimepets.add": "Add"
+}

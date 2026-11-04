@@ -22,6 +22,7 @@ enabledFlags:
   - curseforge
   - includeLibs
   - addTRansitionLib
+  - addTRenderLib
 rootProject:
   template: "."
 subProjects:

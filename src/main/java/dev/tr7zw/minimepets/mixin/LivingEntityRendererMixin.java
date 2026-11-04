@@ -4,6 +4,7 @@ import com.google.gson.*;
 import com.mojang.authlib.*;
 import com.mojang.blaze3d.vertex.*;
 import dev.tr7zw.minimepets.*;
+import dev.tr7zw.minimepets.config.*;
 import net.minecraft.client.*;
 import net.minecraft.client.model.*;
 import net.minecraft.client.renderer.*;
@@ -161,6 +162,12 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         if (customName == null)
             return null;
         String nameString = customName.getString();
+        Config config = MiniMeShared.CONFIG_MANAGER.getConfig();
+        if (config.whitelist && !config.names.contains(nameString)) {
+            return null;
+        } else if (!config.whitelist && config.names.contains(nameString)) {
+            return null;
+        }
         if (!profiles.containsKey(nameString)) {
             profiles.put(nameString, null);
             if (invalidNames.contains(nameString))
