@@ -177,7 +177,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
 
     @Inject(method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V", at = @At("HEAD"))
     private void onExtractRenderState(LivingEntity entity, LivingEntityRenderState state, float partialTicks,
-                                      CallbackInfo ci) {
+            CallbackInfo ci) {
         ((LivingExtension) state).minime$setCustomName(entity.getCustomName());
     }
     //? }
