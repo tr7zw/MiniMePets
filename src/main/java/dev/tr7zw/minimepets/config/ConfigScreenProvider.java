@@ -51,7 +51,10 @@ public class ConfigScreenProvider {
             root.add(addBox, 20, 24, 17, 1);
             WButton addButton = new WButton(ComponentProvider.translatable("text.minimepets.add"));
             addButton.setOnClick(() -> {
-                MiniMeShared.CONFIG_MANAGER.getConfig().names.add(addBox.getText());
+                String name = addBox.getText().trim();
+                if (!name.isBlank()) {
+                    MiniMeShared.CONFIG_MANAGER.getConfig().names.add(name);
+                }
                 addBox.setText("");
                 root.layout();
                 MiniMeShared.CONFIG_MANAGER.writeConfig();
