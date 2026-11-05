@@ -1,10 +1,19 @@
+![Banner image showing an example of different pets turned to mini players](https://tr7zw.dev/curse/MiniMePet-banner.png)
+
 # MiniMePets
 
-Swap named wolfs and cats with tiny players.
+Turn wolfs and cats into small players using a nametag. Have mini versions of yourself, friends, youtubers or whoever you want follow you around on adventures or populating your house. This change is just visual, so wolfs will still fight on your side, all of them take their usual food for breeding/healing and right-clicking will sit them down so they won't follow you around.
 
-## License
+This mod is purely visual and fully clientside, it doesn't have to be installed on servers and works everywhere!
 
-This project is licensed under [``tr7zw Protective License``](LICENSE).
-This license does not allow others to distribute the software/derivative works(in source or binary form).
-You have to contact the author to get permission for redistribution. (For example: Modpacks(that are not hosted on CurseForge), "Clients", mod hosting sites).
-Keep in mind that [Githubs TOS](https://docs.github.com/en/github/site-policy/github-terms-of-service#d-user-generated-content) and [Overwolfs TOS](https://www.overwolf.com/legal/terms/) apply at their respective places. This (among other things) means you don't need to ask to include the mod in a CurseForge Modpack and that by contributing code it explicitly gets the same license as the repository.
+## Dependencies
+
+*   none
+
+## Tested with
+
+*   3d Skin Layers(won't get applied)
+*   Sodium
+*   Iris
+*   Optifine
+*   EMF/ETF
