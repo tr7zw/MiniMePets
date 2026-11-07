@@ -12,10 +12,10 @@ import net.minecraft.server.Bootstrap;
 //? if >= 1.21.5 {
 import net.minecraft.world.entity.animal.wolf.*;
 //? } else {
-/*
-import net.minecraft.world.entity.animal.*;
- */
-//? }
+
+/*import net.minecraft.world.entity.animal.*;
+ 
+*///? }
 
 public class MixinTests {
 

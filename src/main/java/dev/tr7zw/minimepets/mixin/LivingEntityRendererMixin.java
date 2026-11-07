@@ -13,11 +13,13 @@ import net.minecraft.client.renderer.entity.*;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.*;
 import net.minecraft.client.renderer.entity.state.*;
 import net.minecraft.client.resources.*;
+import net.minecraft.core.component.*;
 import net.minecraft.network.chat.*;
 import net.minecraft.util.*;
 import net.minecraft.resources.*;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.*;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.component.*;
 import net.minecraft.world.level.block.entity.*;
 import net.minecraft.world.phys.*;
@@ -107,8 +109,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
     }
 
     //?if < 1.21.10 {
-    /*
-    private GameProfile getProfile(Component customName) {
+
+    /*private GameProfile getProfile(Component customName) {
         if (customName == null) {
             return null;
         }
@@ -224,6 +226,16 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         if (from instanceof WolfRenderState pet) {
             to.isPassenger = pet.isSitting;
             to.isCrouching = pet.shakeAnim > 0 && (System.currentTimeMillis() / 100 % 2 == 0);
+            if (pet.bodyArmorItem != null && !pet.bodyArmorItem.isEmpty()) {
+                ItemStack chestplate = new ItemStack(Items.LEATHER_CHESTPLATE);
+                chestplate.set(DataComponents.DYED_COLOR, pet.bodyArmorItem.get(DataComponents.DYED_COLOR));
+                //? if >= 1.21.4 {
+
+                to.chestEquipment = chestplate;
+                //? } else {
+                /*to.chestItem = chestplate;
+                *///? }
+            }
         }
     }
 
