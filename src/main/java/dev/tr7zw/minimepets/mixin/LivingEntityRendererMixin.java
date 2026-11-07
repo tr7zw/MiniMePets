@@ -5,6 +5,7 @@ import com.mojang.authlib.*;
 import com.mojang.blaze3d.vertex.*;
 import dev.tr7zw.minimepets.*;
 import dev.tr7zw.minimepets.config.*;
+import net.minecraft.*;
 import net.minecraft.client.*;
 import net.minecraft.client.model.*;
 import net.minecraft.client.renderer.*;
@@ -39,7 +40,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         super(context);
     }
 
-    //? if <1.21.9 {
+    //? if <1.21.10 {
     /*private static ExecutorService exector = Executors.newFixedThreadPool(1);
     private static Map<UUID, GameProfile> cachedProfiles = new HashMap<>();
     private static WeakHashMap<String, GameProfile> profiles = new WeakHashMap<>();
@@ -105,8 +106,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         }
     }
 
-    //?if < 1.21.9 {
-    /*private GameProfile getProfile(Component customName) {
+    //?if < 1.21.10 {
+    /*
+    private GameProfile getProfile(Component customName) {
         if (customName == null) {
             return null;
         }
@@ -192,7 +194,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
     private PlayerSkin getSkin(Component name) {
         if (name == null)
             return null;
-        //? if >= 1.21.9 {
+        //? if >= 1.21.10 {
         ResolvableProfile profile = getProfile(name);
         if (profile == null)
             return null;

@@ -86,8 +86,8 @@ public class ConfigScreenProvider {
 
             return key.identifier().toString();
             //? } else {
-            /*
-                return key.location().toString();
+
+            /*return key.location().toString();
             *///? }
         }
 

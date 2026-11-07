@@ -8,12 +8,13 @@ This mod is purely visual and fully clientside, it doesn't have to be installed 
 
 ## Dependencies
 
-*   none
+* none
 
 ## Tested with
 
-*   3d Skin Layers(won't get applied)
-*   Sodium
-*   Iris
-*   Optifine
-*   EMF/ETF
+* 3d Skin Layers(won't get applied)
+* Sodium
+* Iris
+* Optifine
+* EMF/ETF
+
