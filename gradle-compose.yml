@@ -19,6 +19,7 @@ enabledFlags:
   - publishFabric
   - publishForge
   - publishNeoForge
+  - modrinth
   - curseforge
   - includeLibs
   - addTRansitionLib
