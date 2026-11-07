@@ -13,6 +13,7 @@ replacements:
   fabric_modmenu_entrypoint: "dev.tr7zw.minimepets.config.ModMenuProvider"
   relocationpackage: "dev.tr7zw.minimepets"
   curseforgeid: "593627"
+  modrinthid: 8MvflC6k
   versionlessname: "MiniVersionless"
 enabledFlags:
   - autopublish
