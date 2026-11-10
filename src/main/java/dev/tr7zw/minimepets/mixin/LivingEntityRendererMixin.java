@@ -8,6 +8,8 @@ import dev.tr7zw.minimepets.config.*;
 import net.minecraft.*;
 import net.minecraft.client.*;
 import net.minecraft.client.model.*;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.client.renderer.entity.EntityRendererProvider.*;
@@ -197,16 +199,52 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, V extend
         if (name == null)
             return null;
         //? if >= 1.21.10 {
+        Config config = MiniMeShared.CONFIG_MANAGER.getConfig();
+        if (config.prioritizeServerPlayerSkins) {
+            PlayerSkin skin = getServerPlayerSkin(name);
+            if (skin != null)
+                return skin;
+        }
         ResolvableProfile profile = getProfile(name);
         if (profile == null)
             return null;
         return Minecraft.getInstance().playerSkinRenderCache().lookup(profile).getNow(Optional.empty())
                 .map(PlayerSkinRenderCache.RenderInfo::playerSkin).orElse(null);
         //? } else {
-        /*GameProfile profile = getProfile(name);
+        /*Config config = MiniMeShared.CONFIG_MANAGER.getConfig();
+        if (config.prioritizeServerPlayerSkins) {
+            PlayerSkin skin = getServerPlayerSkin(name);
+            if (skin != null)
+                return skin;
+        }
+        GameProfile profile = getProfile(name);
         if (profile == null)
             return null;
         return Minecraft.getInstance().getSkinManager().getInsecureSkin(profile);
+        *///? }
+    }
+
+    private PlayerSkin getServerPlayerSkin(Component name) {
+        if (name == null)
+            return null;
+        //? if >= 1.21.10 {
+        ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null)
+            return null;
+        PlayerInfo info = connection.getPlayerInfo(name.getString());
+        if (info == null)
+            return null;
+        ResolvableProfile profile = ResolvableProfile.createResolved(info.getProfile());
+        return Minecraft.getInstance().playerSkinRenderCache().lookup(profile).getNow(Optional.empty())
+                .map(PlayerSkinRenderCache.RenderInfo::playerSkin).orElse(null);
+        //? } else {
+        /*ClientPacketListener connection = Minecraft.getInstance().getConnection();
+        if (connection == null)
+            return null;
+        PlayerInfo info = connection.getPlayerInfo(name.getString());
+        if (info == null)
+            return null;
+        return Minecraft.getInstance().getSkinManager().getInsecureSkin(info.getProfile());
         *///? }
     }
 
