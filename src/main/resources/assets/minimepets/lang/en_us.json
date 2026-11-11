@@ -4,5 +4,7 @@
     "text.minimepets.remove": "Remove",
     "text.minimepets.whitelist": "Whitelist",
     "text.minimepets.whitelist.tooltip": "Change that only whitelisted names can be used by Mini Me Pets. Otherwise blacklists names that cannot be used by Mini Me Pets.",
+    "text.minimepets.prioritizeServerPlayerSkins": "Prioritize Server Player Skins",
+    "text.minimepets.prioritizeServerPlayerSkins.tooltip": "When enabled, the skin of a player with the same name on the connected server is used instead of looking it up via Mojang. Falls back to the normal lookup if the player is offline or has no usable skin.",
     "text.minimepets.add": "Add"
 }

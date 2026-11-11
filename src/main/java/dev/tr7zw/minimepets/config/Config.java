@@ -7,5 +7,6 @@ public class Config {
     public int version = 1;
     public boolean whitelist = false;
     public List<String> names = new ArrayList<>();
+    public boolean prioritizeServerPlayerSkins = false;
 
 }
